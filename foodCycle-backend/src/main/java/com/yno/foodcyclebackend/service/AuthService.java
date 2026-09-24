@@ -3,6 +3,7 @@ package com.yno.foodcyclebackend.service;
 import com.yno.foodcyclebackend.dao.*;
 import com.yno.foodcyclebackend.dto.request.LoginRequest;
 import com.yno.foodcyclebackend.dto.request.RegisterRequest;
+import com.yno.foodcyclebackend.dto.response.LoginResponse;
 import com.yno.foodcyclebackend.entity.*;
 import com.yno.foodcyclebackend.enums.ProviderType;
 import com.yno.foodcyclebackend.enums.RoleName;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,6 +35,7 @@ public class AuthService {
     private final FoodProviderDao foodProviderDao;
     private final OrganizationDao organizationDao;
     private final VolunteerDao volunteerDao;
+    private final JwtService jwtService;
 
     @Transactional
     public void register(RegisterRequest request) {
@@ -70,10 +74,26 @@ public class AuthService {
         }
     }
 
-    public void login(LoginRequest request) {
-        var auth = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
-        var authentication = authenticationManager.authenticate(auth);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    public LoginResponse login(LoginRequest request) {
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail().trim().toLowerCase(),
+                        request.getPassword()
+                )
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        User user = userDao.findByEmail(request.getEmail().trim().toLowerCase())
+                .orElseThrow(() -> new RuntimeException("Error: User is not found!"));
+
+        String token = jwtService.generateToken(user);
+
+        return new LoginResponse(token, "Bearer", user.getEmail(), user.getRoles()
+                .stream()
+                .map(role -> role.getRoleName().name())
+                .toList());
+
     }
 
 

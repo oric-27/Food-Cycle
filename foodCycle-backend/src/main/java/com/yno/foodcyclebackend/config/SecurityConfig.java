@@ -1,5 +1,6 @@
 package com.yno.foodcyclebackend.config;
 
+import com.yno.foodcyclebackend.security.JwtAuthenticationFilter;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -11,10 +12,12 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -25,6 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final UserDetailsService userDetailsService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -39,13 +43,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.httpBasic(Customizer.withDefaults());
-        http.csrf(c -> c.disable());
-        http.authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/api/auth/**")
-                            .permitAll();
-                    auth.anyRequest().authenticated();
-                }
-        );
+        http.csrf(AbstractHttpConfigurer::disable);
+        http.sessionManagement( s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.authorizeHttpRequests( auth -> {
+            auth.requestMatchers("/api/auth/**").permitAll();
+            auth.anyRequest().authenticated();
+        });
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         http.cors(c -> {
             CorsConfigurationSource source = new CorsConfigurationSource() {
                 @Override

@@ -1,6 +1,7 @@
 package com.yno.foodcyclebackend.security;
 
 import com.yno.foodcyclebackend.entity.User;
+import com.yno.foodcyclebackend.enums.VerificationStatus;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -32,6 +33,11 @@ public class SecurityUser implements UserDetails {
     @Override
     public String getUsername() {
         return user.getEmail();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return Boolean.TRUE.equals(user.getIsActive() && user.getVerificationStatus() == VerificationStatus.VERIFIED);
     }
 
 }
