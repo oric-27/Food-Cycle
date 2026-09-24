@@ -1,38 +1,47 @@
-function Header() {
+interface HeaderProps {
+    onLogin?: () => void;
+    onRegister?: () => void;
+}
+
+function Header({ onLogin, onRegister }: HeaderProps) {
     return (
-        <>
-            <nav className="w-full bg-white border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur">
+            <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4" aria-label="Main navigation">
+                <a href="#landing" className="flex items-center gap-2.5" aria-label="FoodCycle home">
+                    <span className="flex h-6 items-end gap-1" aria-hidden="true">
+                        <span className="h-3 w-1.5 rounded-full bg-[#1b8d62]" />
+                        <span className="h-6 w-1.5 rounded-full bg-[#1b8d62]" />
+                        <span className="h-4 w-1.5 rounded-full bg-[#1b8d62]" />
+                    </span>
+                    <span className="text-xl font-extrabold tracking-tight text-gray-900">
+                        food<span className="text-[#1b8d62]">cycle</span>
+                    </span>
+                </a>
 
-                    {/* Brand Logo & Name */}
-                    <a href="#landing" className="flex items-center gap-2.5 group">
-                        {/* Green Bar Chart Icon */}
-                        <div className="flex items-end gap-1 h-5">
-                            <span className="w-1.5 h-3 bg-[#1b8d62] rounded-full"></span>
-                            <span className="w-1.5 h-5 bg-[#1b8d62] rounded-full"></span>
-                            <span className="w-1.5 h-2.5 bg-[#1b8d62] rounded-full"></span>
-                        </div>
+                <div className="hidden items-center gap-8 text-sm font-semibold text-gray-500 md:flex">
+                    <a className="transition hover:text-[#1b8d62]" href="#how-it-works">How it works</a>
+                    <a className="transition hover:text-[#1b8d62]" href="#impact">Our impact</a>
+                    <a className="transition hover:text-[#1b8d62]" href="#about">About us</a>
+                </div>
 
-                        {/* Brand Text */}
-                        <span className="text-xl font-extrabold text-gray-900 tracking-tight">
-            food<span className="text-[#1b8d62]">cycle</span>
-          </span>
-                    </a>
-
-                    {/* Right Side Actions */}
-                    <div className="flex items-center gap-4 text-sm font-medium text-gray-500">
-                        <span className="hidden sm:inline">Already have an account?</span>
-                        <button
-                            data-screen="login"
-                            className="px-4 py-2 text-[#1b8d62] font-semibold bg-white border border-[#1b8d62]/40 rounded-lg hover:bg-[#eaf7ef] active:scale-95 transition-all shadow-sm"
-                        >
-                            Log in
-                        </button>
-                    </div>
-
+                <div className="flex items-center gap-2 sm:gap-4">
+                    <button
+                        type="button"
+                        onClick={onLogin}
+                        className="rounded-lg px-3 py-2 text-sm font-bold text-[#1b8d62] transition hover:bg-[#eaf7ef] sm:px-4"
+                    >
+                        Log in
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onRegister}
+                        className="hidden rounded-lg bg-[#1b8d62] px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-[#13674c] sm:block"
+                    >
+                        Get started
+                    </button>
                 </div>
             </nav>
-        </>
+        </header>
     );
 }
 
