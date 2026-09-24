@@ -10,6 +10,7 @@ import com.yno.foodcyclebackend.enums.RoleName;
 import com.yno.foodcyclebackend.enums.VerificationStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -39,35 +40,46 @@ public class AuthService {
 
     @Transactional
     public void register(RegisterRequest request) {
-        if (userDao.existsByEmail(request.getEmail())) {
+        String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
+        if (userDao.existsByEmail(email)) {
             throw  new UsernameNotFoundException("Error: Email is already in use!");
         }
 
+        RoleName roleName;
+        try {
+            roleName = RoleName.valueOf(request.getRoleName());
+        } catch (IllegalArgumentException exception) {
+            throw new AccessDeniedException("This registration role is not allowed");
+        }
+        if (roleName == RoleName.ADMIN) {
+            throw new AccessDeniedException("This registration role is not allowed");
+        }
+
         User user = new User();
-        user.setEmail(request.getEmail());
+        user.setEmail(email);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setUsername(request.getUsername());
+        user.setUsername(request.getUsername().trim());
         user.setVerificationStatus(VerificationStatus.PENDING);
         Set<Role> roles = new HashSet<>();
-        Role userRole = roleDao.findByRoleName(RoleName.valueOf(request.getRoleName()))
+        Role userRole = roleDao.findByRoleName(roleName)
                 .orElseThrow(() -> new RuntimeException("Error: Role is not found!"));
         roles.add(userRole);
         user.setRoles(roles);
 
         User saveUser =  userDao.save(user);
 
-        if (RoleName.valueOf(request.getRoleName()) == RoleName.FOOD_PROVIDER){
+        if (roleName == RoleName.FOOD_PROVIDER){
             FoodProvider provider = new FoodProvider();
             provider.setUser(saveUser);
             provider.setProviderType(ProviderType.RESTAURANT);
             foodProviderDao.save(provider);
-        }else if (RoleName.valueOf(request.getRoleName()) == RoleName.ORGANIZATION) {
+        }else if (roleName == RoleName.ORGANIZATION) {
             Organization organization = new Organization();
             organization.setUser(saveUser);
             organization.setDailyCapacityServings(0);
             organization.setRemainingCapacityServings(0);
             organizationDao.save(organization);
-        }else  if (RoleName.valueOf(request.getRoleName()) == RoleName.VOLUNTEER) {
+        }else  if (roleName == RoleName.VOLUNTEER) {
             Volunteer volunteer = new Volunteer();
             volunteer.setUser(saveUser);
             volunteerDao.save(volunteer);

@@ -19,14 +19,12 @@ import java.util.Map;
 public class AuthController {
     private final AuthService authService;
 
-    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request) {
         authService.register(request);
         return ResponseEntity.ok("User registered successfully!");
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));

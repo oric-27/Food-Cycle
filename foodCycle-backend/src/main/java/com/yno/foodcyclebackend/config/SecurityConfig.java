@@ -42,9 +42,10 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.httpBasic(Customizer.withDefaults());
         http.csrf(AbstractHttpConfigurer::disable);
-        http.sessionManagement( s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.httpBasic(AbstractHttpConfigurer::disable);
+        http.sessionManagement( s ->
+                s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.authorizeHttpRequests( auth -> {
             auth.requestMatchers("/api/auth/**").permitAll();
             auth.anyRequest().authenticated();
@@ -60,13 +61,12 @@ public class SecurityConfig {
                     config.setAllowedHeaders(List.of("*"));
                     config.setAllowedMethods(List.of("*"));
                     config.setExposedHeaders(List.of("*"));
-                    config.setAllowCredentials(true);
+                    config.setAllowCredentials(false);
                     return config;
                 }
             };
             c.configurationSource(source);
         });
-
         return http.build();
     }
 
