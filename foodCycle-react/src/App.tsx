@@ -21,7 +21,7 @@ function AuthPage({mode} : {mode: "login" | "register"}) {
         <>
             <Header />
             <HeroSection onRegister={() => navigate("/register")} />
-            <AuthComponent initialMode={mode} onClose={() => navigate("/")} />
+            <AuthComponent key={mode} initialMode={mode} onClose={() => navigate("/")} />
         </>
     )
 }

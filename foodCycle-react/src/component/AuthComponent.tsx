@@ -56,6 +56,7 @@ function AuthComponent({ initialMode, onClose }: AuthModalProps) {
         try {
             if (mode === "login") {
                 const response = await login(email, password);
+                console.log("Login token:", response.token);
                 localStorage.setItem("accessToken", response.token);
                 setSubmitted(true);
             } else {
@@ -65,7 +66,7 @@ function AuthComponent({ initialMode, onClose }: AuthModalProps) {
                 }
                 await register({ username, email, password, roleName: role });
                 setSubmitted(true);
-                setTimeout(() => navigate("/login"), 900);
+                setTimeout(() => navigate("/login"), 1500);
             }
         } catch (requestError) {
             setError(requestError instanceof Error ? requestError.message : "Unable to complete your request.");
@@ -117,7 +118,7 @@ function AuthComponent({ initialMode, onClose }: AuthModalProps) {
                     </div>
                 </div>
 
-                <div className="flex h-full flex-col justify-center p-6 sm:p-10">
+                <div className="flex h-full flex-col justify-center overflow-y-scroll p-6 sm:p-10">
                     <button
                         type="button"
                         onClick={onClose}
@@ -189,7 +190,7 @@ function AuthComponent({ initialMode, onClose }: AuthModalProps) {
                             </>
                         )}
                         {mode === "register" && registerStep === 2 && (
-                            <label className="block text-sm font-semibold text-[#172d27]">
+                            <div className="block text-sm font-semibold text-[#172d27]">
                                 I want to join as
                                 <span className="mt-2 grid gap-3">
                                     <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#dce8df] p-4 transition has-[:checked]:border-[#1b8d62] has-[:checked]:bg-[#f1faf4]">
@@ -214,7 +215,7 @@ function AuthComponent({ initialMode, onClose }: AuthModalProps) {
                                         </span>
                                     </label>
                                 </span>
-                            </label>
+                            </div>
                         )}
                         {mode === "login" && (
                             <div className="flex items-center justify-between text-xs">
@@ -226,15 +227,22 @@ function AuthComponent({ initialMode, onClose }: AuthModalProps) {
                             </div>
                         )}
                         {mode === "register" && registerStep === 2 && (
-                            <button type="button" onClick={() => setRegisterStep(1)} className="w-full rounded-xl border border-[#dce8df] px-5 py-3 text-sm font-bold text-[#75817a] transition hover:border-[#1b8d62] hover:text-[#1b8d62]">
+                            <button type="button" onClick={() => setRegisterStep(1)} className="w-full rounded-xl border border-[#dce8df] px-4 py-2 text-xs font-bold text-[#75817a] transition hover:border-[#1b8d62] hover:text-[#1b8d62]">
                                 ← Back to your details
                             </button>
                         )}
-                        <button type="submit" disabled={isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1b8d62] px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-[#1b8d62]/20 transition hover:bg-[#13674c] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60">
-                            {isSubmitting ? "Please wait..." : mode === "login" ? "Log in to FoodCycle" : registerStep === 1 ? "Continue to role selection" : "Create my account"} <span aria-hidden="true">→</span>
+                        <button type="submit" disabled={isSubmitting || submitted} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1b8d62] px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-[#1b8d62]/20 transition hover:bg-[#13674c] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60">
+                            {submitted
+                                ? (mode === "register" ? "Registration successful!" : "Login successful!")
+                                : isSubmitting
+                                    ? "Please wait..."
+                                    : mode === "login"
+                                        ? "Log in to FoodCycle"
+                                        : registerStep === 1
+                                            ? "Continue to role selection"
+                                            : "Create my account"} {!submitted && <span aria-hidden="true">→</span>}
                         </button>
                         {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-center text-xs font-semibold text-red-700" role="alert">{error}</p>}
-                        {submitted && <p className="rounded-lg bg-[#eaf7ef] px-3 py-2 text-center text-xs font-semibold text-[#13674c]" role="status">Thanks! This UI is ready to connect to your account flow.</p>}
                     </form>
                     <p className="mt-6 text-center text-sm text-[#75817a]">
                         {mode === "login" ? "Don&apos;t have an account?" : "Already have an account?"}{" "}
