@@ -1,5 +1,6 @@
 package com.yno.foodcyclebackend.dto.request;
 
+import com.yno.foodcyclebackend.enums.ProviderType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -17,4 +18,9 @@ public class RegisterRequest {
     private String password;
     @NotBlank
     private String roleName;
+    private String address;
+    private ProviderType providerType;
+    private String registrationNumber;
+    private String dailyCapacityServings;
+    private Boolean isAvailable;
 }

@@ -15,7 +15,7 @@ import lombok.Setter;
 @Table(name = "food_providers")
 public class FoodProvider extends BaseEntity {
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @MapsId
     @JoinColumn(name = "user_id")
     private User user;

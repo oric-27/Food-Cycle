@@ -30,18 +30,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
+        System.out.println("DEBUG JWT Filter: Auth header: " + (authHeader != null ? authHeader.substring(0, Math.min(20, authHeader.length())) + "..." : "null"));
+        
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("DEBUG JWT Filter: No Bearer token, proceeding without auth");
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = authHeader.substring(7);
         String email = jwtService.extractUsername(token);
+        System.out.println("DEBUG JWT Filter: Extracted email: " + email);
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            System.out.println("DEBUG JWT Filter: User loaded, authorities: " + userDetails.getAuthorities());
 
             if (jwtService.validateToken(token)) {
+                System.out.println("DEBUG JWT Filter: Token valid, setting authentication");
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
@@ -54,6 +60,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 );
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                System.out.println("DEBUG JWT Filter: Token validation failed");
             }
         }
 

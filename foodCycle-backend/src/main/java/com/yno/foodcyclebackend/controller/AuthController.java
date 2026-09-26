@@ -19,12 +19,14 @@ import java.util.Map;
 public class AuthController {
     private final AuthService authService;
 
+    // http://localhost:8080/api/auth/register
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request) {
         authService.register(request);
         return ResponseEntity.ok("User registered successfully!");
     }
 
+    // http://localhost:8080/api/auth/login
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));

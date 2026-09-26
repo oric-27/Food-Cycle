@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { login, register } from "../services/authApi";
-import type { UserRole } from "../types/auth";
+import { login, register } from "./authApi.ts";
+import type {ProviderType, UserRole} from "./auth.ts";
 
 interface AuthModalProps {
     initialMode: "login" | "register";
@@ -19,13 +19,18 @@ function LockIcon() {
 function AuthComponent({ initialMode, onClose }: AuthModalProps) {
     const navigate = useNavigate();
     const [mode, setMode] = useState(initialMode);
-    const [registerStep, setRegisterStep] = useState<1 | 2>(1);
+    const [registerStep, setRegisterStep] = useState<1 | 2 | 3>(1);
     const [showPassword, setShowPassword] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [role, setRole] = useState<UserRole | "">("");
+    const [address, setAddress] = useState("");
+    const [providerType, setProviderType] = useState<ProviderType>("RESTAURANT");
+    const [registrationNumber, setRegistrationNumber] = useState("");
+    const [dailyCapacityServings, setDailyCapacityServings] = useState("");
+    const [isAvailable, setIsAvailable] = useState(true);
     const [error, setError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -51,6 +56,14 @@ function AuthComponent({ initialMode, onClose }: AuthModalProps) {
             setRegisterStep(2);
             return;
         }
+        if (mode === "register" && registerStep === 2) {
+            if (!role) {
+                setError("Please choose a role.");
+                return;
+            }
+            setRegisterStep(3);
+            return;
+        }
 
         setIsSubmitting(true);
         try {
@@ -64,7 +77,19 @@ function AuthComponent({ initialMode, onClose }: AuthModalProps) {
                     setError("Please choose a role.");
                     return;
                 }
-                await register({ username, email, password, roleName: role });
+                await register({
+                    username,
+                    email,
+                    password,
+                    roleName: role,
+                    address,
+                    providerType: role === "FOOD_PROVIDER" ? providerType : undefined,
+                    registrationNumber: role === "ORGANIZATION" ? registrationNumber : undefined,
+                    dailyCapacityServings: role === "ORGANIZATION" && dailyCapacityServings
+                        ? Number(dailyCapacityServings)
+                        : undefined,
+                    isAvailable : role === "VOLUNTEER" ? isAvailable : undefined,
+                });
                 setSubmitted(true);
                 setTimeout(() => navigate("/login"), 1500);
             }
@@ -138,28 +163,32 @@ function AuthComponent({ initialMode, onClose }: AuthModalProps) {
                                 ? "Welcome back"
                                 : registerStep === 1
                                     ? "Create your account"
-                                    : "Choose your role"}
+                                    : registerStep === 2
+                                        ? "Choose your role"
+                                        : "Complete your profile"}
                         </h1>
                         <p className="mt-2 text-sm text-[#75817a]">
                             {mode === "login"
                                 ? "Log in to continue your food rescue journey."
                                 : registerStep === 1
                                     ? "Start making an impact in your community today."
-                                    : "Tell us how you would like to help save good food."}
+                                    : registerStep === 2
+                                        ? "Tell us how you would like to help save good food."
+                                        : "Add a few details to complete your profile."}
                         </p>
                     </div>
 
                     {mode === "register" && (
                         <div className="mt-7 flex items-center gap-3" aria-label={`Registration step ${registerStep} of 2`}>
-                            {[1, 2].map((step) => (
+                            {[1, 2, 3].map((step) => (
                                 <div key={step} className="flex flex-1 items-center gap-2">
                                     <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-extrabold ${registerStep >= step ? "bg-[#1b8d62] text-white" : "bg-[#eaf2ec] text-[#8b9790]"}`}>
                                         {step}
                                     </span>
                                     <span className={`text-xs font-bold ${registerStep >= step ? "text-[#1b8d62]" : "text-[#8b9790]"}`}>
-                                        {step === 1 ? "Your details" : "Your role"}
+                                        {step === 1 ? "Your details" : step === 2 ? "Your role" : "Your profile"}
                                     </span>
-                                    {step === 1 && <span className="h-px flex-1 bg-[#dce8df]" />}
+                                    {step === 3 && <span className="h-px flex-1 bg-[#dce8df]" />}
                                 </div>
                             ))}
                         </div>
@@ -217,6 +246,51 @@ function AuthComponent({ initialMode, onClose }: AuthModalProps) {
                                 </span>
                             </div>
                         )}
+                        {mode === "register" && registerStep === 3 && role === "VOLUNTEER" && (
+                            <div className="space-y-4">
+                                <label className="block text-sm font-semibold text-[#172d27]">
+                                    Where are you based?
+                                    <input required value={address} onChange={(event) => setAddress(event.target.value)} placeholder="City or area" className="mt-2 w-full rounded-xl border border-[#dce8df] bg-[#fbfdfb] px-4 py-3 text-sm outline-none placeholder:text-[#a5b0a9] focus:border-[#1b8d62] focus:ring-4 focus:ring-[#1b8d62]/10" />
+                                </label>
+                                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#dce8df] p-4 text-sm font-semibold text-[#172d27]">
+                                    <input type="checkbox" checked={isAvailable} onChange={(event) => setIsAvailable(event.target.checked)} className="h-4 w-4 accent-[#1b8d62]" />
+                                    I am available to help with food rescue activities
+                                </label>
+                            </div>
+                        )}
+                        {mode === "register" && registerStep === 3 && role === "FOOD_PROVIDER" && (
+                            <div className="space-y-4">
+                                <label className="block text-sm font-semibold text-[#172d27]">
+                                    Provider type
+                                    <select value={providerType} onChange={(event) => setProviderType(event.target.value as ProviderType)} className="mt-2 w-full rounded-xl border border-[#dce8df] bg-[#fbfdfb] px-4 py-3 text-sm outline-none focus:border-[#1b8d62] focus:ring-4 focus:ring-[#1b8d62]/10">
+                                        <option value="RESTAURANT">Restaurant</option>
+                                        <option value="HOTEL">Hotel</option>
+                                        <option value="BAKERY">Bakery</option>
+                                        <option value="SUPERMARKET">Supermarket</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                </label>
+                                <label className="block text-sm font-semibold text-[#172d27]">
+                                    Business address
+                                    <input required value={address} onChange={(event) => setAddress(event.target.value)} placeholder="Enter your address" className="mt-2 w-full rounded-xl border border-[#dce8df] bg-[#fbfdfb] px-4 py-3 text-sm outline-none placeholder:text-[#a5b0a9] focus:border-[#1b8d62] focus:ring-4 focus:ring-[#1b8d62]/10" />
+                                </label>
+                            </div>
+                        )}
+                        {mode === "register" && registerStep === 3 && role === "ORGANIZATION" && (
+                            <div className="space-y-4">
+                                <label className="block text-sm font-semibold text-[#172d27]">
+                                    Registration number
+                                    <input required value={registrationNumber} onChange={(event) => setRegistrationNumber(event.target.value)} placeholder="Organization registration number" className="mt-2 w-full rounded-xl border border-[#dce8df] bg-[#fbfdfb] px-4 py-3 text-sm outline-none placeholder:text-[#a5b0a9] focus:border-[#1b8d62] focus:ring-4 focus:ring-[#1b8d62]/10" />
+                                </label>
+                                <label className="block text-sm font-semibold text-[#172d27]">
+                                    Organization address <input required value={address} onChange={(event) => setAddress(event.target.value)} placeholder="Enter your address" className="mt-2 w-full rounded-xl border border-[#dce8df] bg-[#fbfdfb] px-4 py-3 text-sm outline-none placeholder:text-[#a5b0a9] focus:border-[#1b8d62] focus:ring-4 focus:ring-[#1b8d62]/10" />
+                                </label>
+                                <label className="block text-sm font-semibold text-[#172d27]">
+                                    Daily capacity (servings)
+                                    <input required min="1" type="number" value={dailyCapacityServings} onChange={(event) => setDailyCapacityServings(event.target.value)} placeholder="e.g. 100" className="mt-2 w-full rounded-xl border border-[#dce8df] bg-[#fbfdfb] px-4 py-3 text-sm outline-none placeholder:text-[#a5b0a9] focus:border-[#1b8d62] focus:ring-4 focus:ring-[#1b8d62]/10" />
+                                </label>
+                            </div>
+                        )}
                         {mode === "login" && (
                             <div className="flex items-center justify-between text-xs">
                                 <label className="flex items-center gap-2 text-[#75817a]">
@@ -226,9 +300,9 @@ function AuthComponent({ initialMode, onClose }: AuthModalProps) {
                                 <button type="button" className="font-bold text-[#1b8d62] hover:text-[#13674c]">Forgot password?</button>
                             </div>
                         )}
-                        {mode === "register" && registerStep === 2 && (
-                            <button type="button" onClick={() => setRegisterStep(1)} className="w-full rounded-xl border border-[#dce8df] px-4 py-2 text-xs font-bold text-[#75817a] transition hover:border-[#1b8d62] hover:text-[#1b8d62]">
-                                ← Back to your details
+                        {mode === "register" && registerStep === 3 && (
+                            <button type="button" onClick={() => setRegisterStep(2)} className="w-full rounded-xl border border-[#dce8df] px-4 py-2 text-xs font-bold text-[#75817a] transition hover:border-[#1b8d62] hover:text-[#1b8d62]">
+                                ← Back to role selection
                             </button>
                         )}
                         <button type="submit" disabled={isSubmitting || submitted} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1b8d62] px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-[#1b8d62]/20 transition hover:bg-[#13674c] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60">
@@ -240,7 +314,9 @@ function AuthComponent({ initialMode, onClose }: AuthModalProps) {
                                         ? "Log in to FoodCycle"
                                         : registerStep === 1
                                             ? "Continue to role selection"
-                                            : "Create my account"} {!submitted && <span aria-hidden="true">→</span>}
+                                            : registerStep == 2
+                                                ? "Continue to profile"
+                                                : "Create my account"} {!submitted && <span aria-hidden="true">→</span>}
                         </button>
                         {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-center text-xs font-semibold text-red-700" role="alert">{error}</p>}
                     </form>

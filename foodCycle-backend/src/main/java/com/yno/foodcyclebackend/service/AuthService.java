@@ -8,13 +8,12 @@ import com.yno.foodcyclebackend.entity.*;
 import com.yno.foodcyclebackend.enums.ProviderType;
 import com.yno.foodcyclebackend.enums.RoleName;
 import com.yno.foodcyclebackend.enums.VerificationStatus;
+import com.yno.foodcyclebackend.foodProvider.dao.FoodProviderDao;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -47,7 +45,7 @@ public class AuthService {
 
         RoleName roleName;
         try {
-            roleName = RoleName.valueOf(request.getRoleName());
+            roleName = RoleName.valueOf(request.getRoleName().trim().toUpperCase(Locale.ROOT).replace(' ', '_'));
         } catch (IllegalArgumentException exception) {
             throw new AccessDeniedException("This registration role is not allowed");
         }
@@ -71,17 +69,25 @@ public class AuthService {
         if (roleName == RoleName.FOOD_PROVIDER){
             FoodProvider provider = new FoodProvider();
             provider.setUser(saveUser);
-            provider.setProviderType(ProviderType.RESTAURANT);
+            provider.setProviderType(
+                    request.getRegistrationNumber() == null ? ProviderType.OTHER : request.getProviderType()
+            );
+            provider.setAddress(request.getAddress());
             foodProviderDao.save(provider);
         }else if (roleName == RoleName.ORGANIZATION) {
             Organization organization = new Organization();
             organization.setUser(saveUser);
-            organization.setDailyCapacityServings(0);
-            organization.setRemainingCapacityServings(0);
+            organization.setAddress(request.getAddress());
+            int capacity = request.getDailyCapacityServings() == null ?
+                            0 :
+                            Integer.parseInt(request.getDailyCapacityServings());
+            organization.setDailyCapacityServings(capacity);
+            organization.setRemainingCapacityServings(capacity);
             organizationDao.save(organization);
         }else  if (roleName == RoleName.VOLUNTEER) {
             Volunteer volunteer = new Volunteer();
             volunteer.setUser(saveUser);
+            volunteer.setIsAvailable(request.getIsAvailable() == null || request.getIsAvailable());
             volunteerDao.save(volunteer);
         }
     }

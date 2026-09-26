@@ -1,7 +1,7 @@
 import {BrowserRouter, Routes, Route, useNavigate, Navigate} from "react-router-dom";
 import Header from "./component/Header";
 import HeroSection from "./component/HeroSection";
-import AuthComponent from "./component/AuthComponent.tsx";
+import AuthComponent from "./feactures/auth/AuthComponent.tsx";
 
 function LandingPage() {
     const navigate = useNavigate();

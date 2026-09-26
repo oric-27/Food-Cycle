@@ -1,10 +1,15 @@
-import type {LoginResponse, UserRole} from "../types/auth.ts";
+import type {LoginResponse, UserRole} from "./auth.ts";
 
 export interface RegisterPayload {
     username: string;
     email: string;
     password: string;
     roleName: UserRole;
+    address?: string;
+    providerType?: string;
+    registrationNumber?: string;
+    dailyCapacityServings?: number;
+    isAvailable?: boolean;
 }
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8080/api/auth"
@@ -22,6 +27,11 @@ export async function register(payload: RegisterPayload): Promise<void> {
         email: payload.email.trim().toLocaleLowerCase(),
         password: payload.password,
         roleName: payload.roleName,
+        address: payload.address?.trim() || undefined,
+        providerType: payload.providerType,
+        registrationNumber: payload.registrationNumber?.trim() || undefined,
+        dailyCapacityServings: payload.dailyCapacityServings,
+        isAvailable: payload.isAvailable
     };
 
     if (!normailzedPayload.username || !normailzedPayload.email || !normailzedPayload.password) {
