@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -15,8 +17,8 @@ import lombok.Setter;
 @Table(name = "food_claims")
 public class FoodClaim extends BaseEntity {
 
-    @OneToOne
-    @JoinColumn(name = "food_listing_id", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "food_listing_id", nullable = false)
     private FoodListing foodListing;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -25,6 +27,18 @@ public class FoodClaim extends BaseEntity {
 
     @Column(name = "claimed_servings", nullable = false)
     private Integer claimedServings;
+
+    @Column(name = "total_price")
+    private Double totalPrice = 0.0;
+
+    @Column(name = "pickup_otp_hash")
+    private String pickupOtpHash;
+
+    @Column(name = "pickup_otp_expires_at")
+    private LocalDateTime pickupOtpExpiresAt;
+
+    @Column(name = "pickup_otp_attempts")
+    private Integer pickupOtpAttempts = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

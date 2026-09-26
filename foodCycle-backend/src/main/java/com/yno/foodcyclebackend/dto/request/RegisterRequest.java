@@ -20,6 +20,9 @@ public class RegisterRequest {
     private String roleName;
     private String address;
     private ProviderType providerType;
+    private String businessName;
+    private String contactNumber;
+    private String licenseDocumentUrl;
     private String registrationNumber;
     private String dailyCapacityServings;
     private Boolean isAvailable;
