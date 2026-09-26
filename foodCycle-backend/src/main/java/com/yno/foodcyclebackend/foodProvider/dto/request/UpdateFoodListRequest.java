@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
+import com.yno.foodcyclebackend.enums.OfferType;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +18,10 @@ public class UpdateFoodListRequest {
 
     private String description;
 
+    private String imageUrl;
+
+    private Long categoryId;
+
     @NotNull
     @Positive
     private Double quantityKg;
@@ -26,13 +30,17 @@ public class UpdateFoodListRequest {
     @Positive
     private Integer servingsEquivalent;
 
+    private OfferType offerType;
+
+    private Double priceAmount;
+
     private LocalDateTime preparedTime;
 
-    @NonNull
+    @NotNull
     @Future
     private LocalDateTime expiryTime;
 
-    @NonNull
+    @NotNull
     @Future
     private LocalDateTime pickupDeadline;
 

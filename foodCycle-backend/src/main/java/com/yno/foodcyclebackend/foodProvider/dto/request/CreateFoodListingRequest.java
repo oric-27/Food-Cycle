@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.cglib.core.Local;
+import com.yno.foodcyclebackend.enums.OfferType;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +18,10 @@ public class CreateFoodListingRequest {
 
     private String description;
 
+    private String imageUrl;
+
+    private Long categoryId;
+
     @NotNull
     @Positive
     private Double quantityKg;
@@ -25,6 +29,10 @@ public class CreateFoodListingRequest {
     @NotNull
     @Positive
     private Integer servingsEquivalent;
+
+    private OfferType offerType;
+
+    private Double priceAmount;
 
     private LocalDateTime preparedTime;
 

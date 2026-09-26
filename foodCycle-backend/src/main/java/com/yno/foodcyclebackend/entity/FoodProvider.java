@@ -24,6 +24,18 @@ public class FoodProvider extends BaseEntity {
     @Column(name = "provider_type", nullable = false)
     private ProviderType providerType;
 
+    @Column(name = "business_name")
+    private String businessName;
+
     private String address;
+
+    @Column(name = "contact_number")
+    private String contactNumber;
+
+    @Column(name = "license_document_url")
+    private String licenseDocumentUrl;
+
+    @Column(name = "registration_number")
+    private String registrationNumber;
 
 }

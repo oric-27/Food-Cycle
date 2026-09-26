@@ -70,9 +70,15 @@ public class AuthService {
             FoodProvider provider = new FoodProvider();
             provider.setUser(saveUser);
             provider.setProviderType(
-                    request.getRegistrationNumber() == null ? ProviderType.OTHER : request.getProviderType()
+                    request.getProviderType() == null ? ProviderType.OTHER : request.getProviderType()
             );
             provider.setAddress(request.getAddress());
+            provider.setBusinessName(request.getBusinessName() == null
+                    ? user.getUsername()
+                    : request.getBusinessName().trim());
+            provider.setContactNumber(request.getContactNumber());
+            provider.setLicenseDocumentUrl(request.getLicenseDocumentUrl());
+            provider.setRegistrationNumber(request.getRegistrationNumber());
             foodProviderDao.save(provider);
         }else if (roleName == RoleName.ORGANIZATION) {
             Organization organization = new Organization();
