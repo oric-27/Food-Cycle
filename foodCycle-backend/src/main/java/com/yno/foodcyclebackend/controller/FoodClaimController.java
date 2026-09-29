@@ -2,7 +2,7 @@ package com.yno.foodcyclebackend.controller;
 
 import com.yno.foodcyclebackend.dto.request.CreateFoodClaimRequest;
 import com.yno.foodcyclebackend.dto.response.FoodClaimResponse;
-import com.yno.foodcyclebackend.service.FoodClaimService;
+import com.yno.foodcyclebackend.organization.service.FoodClaimService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

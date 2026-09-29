@@ -1,5 +1,6 @@
 package com.yno.foodcyclebackend.entity;
 
+import com.yno.foodcyclebackend.organization.entity.Organization;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -9,5 +9,6 @@ public record LoginResponse(
         String token,
         String type,
         String email,
+        String username,
         List<String> roles
 ) {}

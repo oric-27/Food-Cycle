@@ -8,7 +8,7 @@ import com.yno.foodcyclebackend.foodProvider.dto.response.ProviderProfileRespons
 import com.yno.foodcyclebackend.dto.request.UpdateClaimStatusRequest;
 import com.yno.foodcyclebackend.dto.request.VerifyPickupRequest;
 import com.yno.foodcyclebackend.dto.response.FoodClaimResponse;
-import com.yno.foodcyclebackend.service.FoodClaimService;
+import com.yno.foodcyclebackend.organization.service.FoodClaimService;
 import com.yno.foodcyclebackend.service.ProviderAnalyticsService;
 import com.yno.foodcyclebackend.dto.response.ProviderFinancialReportResponse;
 import com.yno.foodcyclebackend.foodProvider.service.FoodProviderService;

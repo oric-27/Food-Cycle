@@ -9,6 +9,8 @@ import com.yno.foodcyclebackend.enums.ProviderType;
 import com.yno.foodcyclebackend.enums.RoleName;
 import com.yno.foodcyclebackend.enums.VerificationStatus;
 import com.yno.foodcyclebackend.foodProvider.dao.FoodProviderDao;
+import com.yno.foodcyclebackend.organization.dao.OrganizationDao;
+import com.yno.foodcyclebackend.organization.entity.Organization;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -84,11 +88,18 @@ public class AuthService {
             Organization organization = new Organization();
             organization.setUser(saveUser);
             organization.setAddress(request.getAddress());
+            organization.setOrganizationName(request.getOrganizationName() == null
+                    ? user.getUsername()
+                    : request.getOrganizationName().trim());
+            organization.setContactNumber(request.getContentNumber());
+            organization.setRegistrationNumber(request.getRegistrationNumber());
+            organization.setLicenseDocumentUrl(request.getLicenseDocumentUrl());
             int capacity = request.getDailyCapacityServings() == null ?
                             0 :
                             Integer.parseInt(request.getDailyCapacityServings());
             organization.setDailyCapacityServings(capacity);
             organization.setRemainingCapacityServings(capacity);
+            organization.setCapacityResetDate(LocalDate.now(ZoneId.of("Asia/Yangon")));
             organizationDao.save(organization);
         }else  if (roleName == RoleName.VOLUNTEER) {
             Volunteer volunteer = new Volunteer();
@@ -113,7 +124,7 @@ public class AuthService {
 
         String token = jwtService.generateToken(user);
 
-        return new LoginResponse(token, "Bearer", user.getEmail(), user.getRoles()
+        return new LoginResponse(token, "Bearer", user.getEmail(), user.getUsername(), user.getRoles()
                 .stream()
                 .map(role -> role.getRoleName().name())
                 .toList());

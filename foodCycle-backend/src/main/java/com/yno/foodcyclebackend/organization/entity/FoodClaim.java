@@ -1,5 +1,7 @@
-package com.yno.foodcyclebackend.entity;
+package com.yno.foodcyclebackend.organization.entity;
 
+import com.yno.foodcyclebackend.entity.BaseEntity;
+import com.yno.foodcyclebackend.entity.FoodListing;
 import com.yno.foodcyclebackend.enums.ClaimStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -43,5 +46,8 @@ public class FoodClaim extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ClaimStatus status = ClaimStatus.REQUESTED;
+
+    @Column(name = "capacity_reservation_date")
+    private LocalDate capacityReservationDate;
 
 }

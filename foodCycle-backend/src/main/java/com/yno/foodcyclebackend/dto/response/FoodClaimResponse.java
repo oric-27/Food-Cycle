@@ -1,6 +1,6 @@
 package com.yno.foodcyclebackend.dto.response;
 
-import com.yno.foodcyclebackend.entity.FoodClaim;
+import com.yno.foodcyclebackend.organization.entity.FoodClaim;
 import com.yno.foodcyclebackend.enums.ClaimStatus;
 
 import java.time.LocalDateTime;

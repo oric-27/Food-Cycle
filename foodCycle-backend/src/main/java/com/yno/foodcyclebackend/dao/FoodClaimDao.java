@@ -1,6 +1,6 @@
 package com.yno.foodcyclebackend.dao;
 
-import com.yno.foodcyclebackend.entity.FoodClaim;
+import com.yno.foodcyclebackend.organization.entity.FoodClaim;
 import com.yno.foodcyclebackend.enums.ClaimStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;

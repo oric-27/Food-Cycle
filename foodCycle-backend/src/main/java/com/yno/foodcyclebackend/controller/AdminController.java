@@ -1,5 +1,6 @@
 package com.yno.foodcyclebackend.controller;
 
+import com.yno.foodcyclebackend.organization.dao.OrganizationDao;
 import com.yno.foodcyclebackend.dao.UserDao;
 import com.yno.foodcyclebackend.enums.RoleName;
 import com.yno.foodcyclebackend.enums.VerificationStatus;
@@ -22,6 +23,8 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class AdminController {
     private final UserDao userDao;
     private final FoodProviderDao foodProviderDao;
+    private final OrganizationDao organizationDao;
+
 
     @PostMapping("/users/{id}/approve")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -41,6 +44,21 @@ public class AdminController {
                         BAD_REQUEST, "Food Provider business profile and license document are required");
             }
         }
+        boolean organizationAccount = user.getRoles().stream()
+                        .anyMatch(role -> role.getRoleName() == RoleName.ORGANIZATION);
+        if (organizationAccount) {
+            var organization = organizationDao.findByUserEmail(user.getEmail())
+                    .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Organization profile not found"));
+            if (isBlank(organization.getOrganizationName()) || isBlank(organization.getAddress())
+                    || isBlank(organization.getContactNumber()) || isBlank(organization.getLicenseDocumentUrl())
+                    || isBlank(organization.getLicenseDocumentUrl())
+                    || organization.getDailyCapacityServings() == null
+                    || organization.getDailyCapacityServings() <= 0) {
+                throw new ResponseStatusException(
+                        BAD_REQUEST, "Organization profile, registration, license and positive daily capacity are required");
+            }
+        }
+
         user.setVerificationStatus(VerificationStatus.VERIFIED);
         return ResponseEntity.ok("User " + id + " approved successfully");
     }

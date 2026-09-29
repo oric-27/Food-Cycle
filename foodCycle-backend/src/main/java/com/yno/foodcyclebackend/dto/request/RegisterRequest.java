@@ -25,5 +25,7 @@ public class RegisterRequest {
     private String licenseDocumentUrl;
     private String registrationNumber;
     private String dailyCapacityServings;
+    private String organizationName;
+    private String contentNumber;
     private Boolean isAvailable;
 }

@@ -1,6 +1,7 @@
 package com.yno.foodcyclebackend.entity;
 
 import com.yno.foodcyclebackend.enums.MissionStatus;
+import com.yno.foodcyclebackend.organization.entity.FoodClaim;
 import jakarta.persistence.*;
 import lombok.*;
 

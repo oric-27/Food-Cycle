@@ -2,6 +2,7 @@ import {BrowserRouter, Routes, Route, useNavigate, Navigate} from "react-router-
 import Header from "./component/Header";
 import HeroSection from "./component/HeroSection";
 import AuthComponent from "./feactures/auth/AuthComponent.tsx";
+import FoodProviderDashboard from "./feactures/provider/FoodProviderDashboard.tsx";
 
 function LandingPage() {
     const navigate = useNavigate();
@@ -34,6 +35,7 @@ function App() {
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/login" element={<AuthPage mode="login" />} />
                     <Route path="/register" element={<AuthPage mode="register" />} />
+                    <Route path="/provider" element={<FoodProviderDashboard />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </BrowserRouter>

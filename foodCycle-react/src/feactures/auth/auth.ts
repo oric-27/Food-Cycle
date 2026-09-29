@@ -7,5 +7,6 @@ export interface LoginResponse {
     token: string;
     type: string;
     email: string;
+    username: string;
     roles: string[];
 }

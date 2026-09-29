@@ -1,15 +1,14 @@
-package com.yno.foodcyclebackend.service;
+package com.yno.foodcyclebackend.organization.service;
 
 import com.yno.foodcyclebackend.dao.FoodClaimDao;
 import com.yno.foodcyclebackend.dao.FoodListingDao;
-import com.yno.foodcyclebackend.dao.OrganizationDao;
-import com.yno.foodcyclebackend.entity.FoodClaim;
+import com.yno.foodcyclebackend.organization.dao.OrganizationDao;
+import com.yno.foodcyclebackend.organization.entity.FoodClaim;
 import com.yno.foodcyclebackend.entity.FoodListing;
-import com.yno.foodcyclebackend.entity.Organization;
+import com.yno.foodcyclebackend.organization.entity.Organization;
 import com.yno.foodcyclebackend.enums.ClaimStatus;
 import com.yno.foodcyclebackend.enums.ListingStatus;
 import com.yno.foodcyclebackend.enums.OfferType;
-import com.yno.foodcyclebackend.enums.VerificationStatus;
 import com.yno.foodcyclebackend.dto.request.CreateFoodClaimRequest;
 import com.yno.foodcyclebackend.dto.response.FoodClaimResponse;
 import com.yno.foodcyclebackend.foodProvider.service.FoodProviderService;
@@ -22,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -34,6 +35,7 @@ public class FoodClaimService {
     private final FoodClaimDao foodClaimDao;
     private final FoodListingDao foodListingDao;
     private final OrganizationDao organizationDao;
+    private final OrganizationService organizationService;
     private final FoodProviderService foodProviderService;
     private final PasswordEncoder passwordEncoder;
     private final SecureRandom secureRandom = new SecureRandom();
@@ -68,7 +70,9 @@ public class FoodClaimService {
         claim.setPickupOtpExpiresAt(listing.getPickupDeadline());
         claim.setPickupOtpAttempts(0);
         claim.setStatus(ClaimStatus.REQUESTED);
+        claim.setCapacityReservationDate(LocalDate.now(ZoneId.of("Asia/Yangon")));
         listing.setStatus(ListingStatus.RESERVED);
+        organizationDao.save(organization);
         return FoodClaimResponse.from(foodClaimDao.save(claim), otp);
     }
 
@@ -94,6 +98,14 @@ public class FoodClaimService {
     public FoodClaimResponse updateStatus(
             Long claimId, ClaimStatus requestedStatus, Authentication authentication) {
         var provider = foodProviderService.getVerifiedProviderForClaims(authentication);
+
+        Organization organizationForRelease = null;
+        if (requestedStatus == ClaimStatus.REJECTED) {
+            FoodClaim existingClaim = foodClaimDao.findById(claimId)
+                    .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Food claim not found"));
+            organizationForRelease = organizationService.lockById(existingClaim.getOrganization().getId());
+        }
+
         FoodClaim claim = getClaimForUpdate(claimId);
         if (!claim.getFoodListing().getProvider().getId().equals(provider.getId())) {
             throw new AccessDeniedException("You do not own this food claim");
@@ -116,6 +128,12 @@ public class FoodClaimService {
             claim.setPickupOtpHash(null);
             claim.setPickupOtpExpiresAt(null);
             claim.getFoodListing().setStatus(ListingStatus.AVAILABLE);
+            organizationService.releaseCapacity(
+                    organizationForRelease,
+                    claim.getClaimedServings(),
+                    claim.getCapacityReservationDate()
+            );
+            organizationDao.save(organizationForRelease);
         }
         return FoodClaimResponse.from(foodClaimDao.save(claim));
     }
@@ -184,6 +202,12 @@ public class FoodClaimService {
         claim.setPickupOtpHash(null);
         claim.setPickupOtpExpiresAt(null);
         claim.getFoodListing().setStatus(ListingStatus.AVAILABLE);
+        organizationService.releaseCapacity(
+                organization,
+                claim.getClaimedServings(),
+                claim.getCapacityReservationDate());
+        organizationDao.save(organization);
+        foodClaimDao.save(claim);
     }
 
     private FoodClaim getClaimForUpdate(Long claimId) {
@@ -197,11 +221,6 @@ public class FoodClaimService {
     }
 
     private Organization getVerifiedOrganization(Authentication authentication) {
-        Organization organization = getOrganization(authentication);
-        if (organization.getUser().getVerificationStatus() != VerificationStatus.VERIFIED
-                || !Boolean.TRUE.equals(organization.getUser().getIsActive())) {
-            throw new AccessDeniedException("Organization account is not approved");
-        }
-        return organization;
+        return organizationService.getVerifiedOrganizationForClaim(authentication);
     }
 }

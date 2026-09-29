@@ -50,6 +50,7 @@ public class SecurityConfig {
                 s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.authorizeHttpRequests( auth -> {
             auth.requestMatchers("/api/auth/**").permitAll();
+            auth.requestMatchers("/api/provider/**").hasRole("FOOD_PROVIDER");
             auth.anyRequest().authenticated();
         });
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

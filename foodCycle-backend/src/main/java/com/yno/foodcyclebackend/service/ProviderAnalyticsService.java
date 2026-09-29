@@ -3,7 +3,7 @@ package com.yno.foodcyclebackend.service;
 import com.yno.foodcyclebackend.dao.FoodClaimDao;
 import com.yno.foodcyclebackend.dto.response.ProviderFinancialReportResponse;
 import com.yno.foodcyclebackend.dto.response.ProviderImpactReportResponse;
-import com.yno.foodcyclebackend.entity.FoodClaim;
+import com.yno.foodcyclebackend.organization.entity.FoodClaim;
 import com.yno.foodcyclebackend.enums.ClaimStatus;
 import com.yno.foodcyclebackend.enums.OfferType;
 import com.yno.foodcyclebackend.foodProvider.service.FoodProviderService;
