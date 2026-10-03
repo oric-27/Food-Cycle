@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, register } from "./authApi.ts";
 import type {ProviderType, UserRole} from "./auth.ts";
+import OrganizationProfileForm from "../roles/OrganizationProflleForm.tsx";
 
 interface AuthModalProps {
     initialMode: "login" | "register";
@@ -27,6 +28,9 @@ function AuthComponent({ initialMode, onClose }: AuthModalProps) {
     const [password, setPassword] = useState("");
     const [role, setRole] = useState<UserRole | "">("");
     const [address, setAddress] = useState("");
+    const [organizationName, setOrganizationName] = useState("");
+    const [contactNumber, setContactNumber] = useState("");
+    const [licenseDocumentUrl, setLicenseDocumentUrl] = useState("");
     const [providerType, setProviderType] = useState<ProviderType>("RESTAURANT");
     const [registrationNumber, setRegistrationNumber] = useState("");
     const [dailyCapacityServings, setDailyCapacityServings] = useState("");
@@ -68,16 +72,21 @@ function AuthComponent({ initialMode, onClose }: AuthModalProps) {
         try {
             if (mode === "login") {
                 const response = await login(email, password);
-                if (!response.roles.includes("FOOD_PROVIDER")) {
-                    setError("This workspace is only available to Food Provider accounts.");
+                const loginRole = response.roles.includes("FOOD_PROVIDER")
+                    ? "FOOD_PROVIDER"
+                    : response.roles.includes("ORGANIZATION")
+                        ? "ORGANIZATION"
+                        : null;
+                if (!loginRole) {
+                    setError("This workspace is currently available to Food Provider and Organization accounts.");
                     return;
                 }
                 localStorage.setItem("accessToken", response.token);
-                localStorage.setItem("userRole", "FOOD_PROVIDER");
+                localStorage.setItem("userRole", loginRole);
                 localStorage.setItem("displayName", response.username || response.email);
                 window.dispatchEvent(new Event("foodcycle-auth-change"));
                 setSubmitted(true);
-                navigate("/provider");
+                navigate(loginRole === "FOOD_PROVIDER" ? "/provider" : "/organization");
             } else {
                 if (!role) {
                     setError("Please choose a role.");
@@ -90,6 +99,9 @@ function AuthComponent({ initialMode, onClose }: AuthModalProps) {
                     roleName: role,
                     address,
                     providerType: role === "FOOD_PROVIDER" ? providerType : undefined,
+                    organizationName: role === "ORGANIZATION" ? organizationName : undefined,
+                    contactNumber: role === "ORGANIZATION" ? contactNumber : undefined,
+                    licenseDocumentUrl: role === "ORGANIZATION" ? licenseDocumentUrl : undefined,
                     registrationNumber: role === "ORGANIZATION" ? registrationNumber : undefined,
                     dailyCapacityServings: role === "ORGANIZATION" && dailyCapacityServings
                         ? Number(dailyCapacityServings)
@@ -279,19 +291,20 @@ function AuthComponent({ initialMode, onClose }: AuthModalProps) {
         </div>
     )}
 {mode === "register" && registerStep === 3 && role === "ORGANIZATION" && (
-        <div className="space-y-4">
-            <label className="block text-sm font-semibold text-[#172d27]">
-                Registration number
-                <input required value={registrationNumber} onChange={(event) => setRegistrationNumber(event.target.value)} placeholder="Organization registration number" className="mt-2 w-full rounded-xl border border-[#dce8df] bg-[#fbfdfb] px-4 py-3 text-sm outline-none placeholder:text-[#a5b0a9] focus:border-[#1b8d62] focus:ring-4 focus:ring-[#1b8d62]/10" />
-            </label>
-            <label className="block text-sm font-semibold text-[#172d27]">
-                Organization address <input required value={address} onChange={(event) => setAddress(event.target.value)} placeholder="Enter your address" className="mt-2 w-full rounded-xl border border-[#dce8df] bg-[#fbfdfb] px-4 py-3 text-sm outline-none placeholder:text-[#a5b0a9] focus:border-[#1b8d62] focus:ring-4 focus:ring-[#1b8d62]/10" />
-            </label>
-            <label className="block text-sm font-semibold text-[#172d27]">
-                Daily capacity (servings)
-                <input required min="1" type="number" value={dailyCapacityServings} onChange={(event) => setDailyCapacityServings(event.target.value)} placeholder="e.g. 100" className="mt-2 w-full rounded-xl border border-[#dce8df] bg-[#fbfdfb] px-4 py-3 text-sm outline-none placeholder:text-[#a5b0a9] focus:border-[#1b8d62] focus:ring-4 focus:ring-[#1b8d62]/10" />
-            </label>
-        </div>
+        <OrganizationProfileForm
+            organizationName={organizationName}
+            address={address}
+            contactNumber={contactNumber}
+            registrationNumber={registrationNumber}
+            licenseDocumentUrl={licenseDocumentUrl}
+            dailyCapacityServings={dailyCapacityServings}
+            onOrganizationNameChange={setOrganizationName}
+            onAddressChange={setAddress}
+            onContactNumberChange={setContactNumber}
+            onRegistrationNumberChange={setRegistrationNumber}
+            onLicenseDocumentUrlChange={setLicenseDocumentUrl}
+            onCapacityChange={setDailyCapacityServings}
+        />
     )}
 {mode === "login" && (
         <div className="flex items-center justify-between text-xs">

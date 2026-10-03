@@ -1,8 +1,10 @@
 package com.yno.foodcyclebackend.dto.request;
 
 import com.yno.foodcyclebackend.enums.ProviderType;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,11 +23,12 @@ public class RegisterRequest {
     private String address;
     private ProviderType providerType;
     private String businessName;
+    @JsonAlias("contentNumber")
     private String contactNumber;
     private String licenseDocumentUrl;
     private String registrationNumber;
-    private String dailyCapacityServings;
+    @PositiveOrZero
+    private Integer dailyCapacityServings;
     private String organizationName;
-    private String contentNumber;
     private Boolean isAvailable;
 }

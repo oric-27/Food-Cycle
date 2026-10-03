@@ -16,6 +16,8 @@ All routes require a bearer token unless otherwise noted by the auth controller.
 | `POST` | `/api/food-claims` | An approved organization requests servings; response contains its pickup OTP |
 | `GET` | `/api/food-claims` | List the signed-in organization's requests |
 | `POST` | `/api/food-claims/{claimId}/cancel` | Cancel a pending request |
+| `GET`, `PUT` | `/api/organizations/profile` | View/update the signed-in organization's profile |
+| `PUT` | `/api/organizations/capacity` | Update daily serving capacity |
 | `GET` | `/api/food-providers/claims` | List requests for the provider |
 | `PUT` | `/api/food-providers/claims/{claimId}/status` | Advance `REQUESTED -> CONFIRMED -> PREPARING -> READY_FOR_PICKUP`, or reject |
 | `POST` | `/api/food-providers/claims/{claimId}/verify-pickup` | Verify OTP and complete pickup |
@@ -33,6 +35,13 @@ listing's `servingsEquivalent`.
 external upload/object-storage service. This backend does not accept multipart
 uploads or store files. Sale totals are recorded for reporting; no payment
 gateway or currency conversion is implemented.
+
+Organization registration requires an organization name, address, contact number,
+registration number, license document URL, and a positive daily capacity. Only
+verified, active organizations can request food. Requested servings reserve daily
+capacity; cancellation of a pending request and provider rejection restore that
+capacity when the reservation was made on the current Yangon calendar day.
+Completed servings remain counted toward the day's capacity.
 
 ## Existing MySQL database upgrade
 

@@ -21,12 +21,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +58,16 @@ public class AuthService {
         }
         if (roleName == RoleName.ADMIN) {
             throw new AccessDeniedException("This registration role is not allowed");
+        }
+        if (roleName == RoleName.ORGANIZATION) {
+            requireOrganizationField(request.getOrganizationName(), "Organization name");
+            requireOrganizationField(request.getAddress(), "Organization address");
+            requireOrganizationField(request.getContactNumber(), "Organization contact number");
+            requireOrganizationField(request.getRegistrationNumber(), "Registration number");
+            requireOrganizationField(request.getLicenseDocumentUrl(), "License document URL");
+            if (request.getDailyCapacityServings() == null || request.getDailyCapacityServings() <= 0) {
+                throw new ResponseStatusException(BAD_REQUEST, "Daily capacity must be greater than zero");
+            }
         }
 
         User user = new User();
@@ -87,16 +100,12 @@ public class AuthService {
         }else if (roleName == RoleName.ORGANIZATION) {
             Organization organization = new Organization();
             organization.setUser(saveUser);
-            organization.setAddress(request.getAddress());
-            organization.setOrganizationName(request.getOrganizationName() == null
-                    ? user.getUsername()
-                    : request.getOrganizationName().trim());
-            organization.setContactNumber(request.getContentNumber());
-            organization.setRegistrationNumber(request.getRegistrationNumber());
-            organization.setLicenseDocumentUrl(request.getLicenseDocumentUrl());
-            int capacity = request.getDailyCapacityServings() == null ?
-                            0 :
-                            Integer.parseInt(request.getDailyCapacityServings());
+            organization.setAddress(request.getAddress().trim());
+            organization.setOrganizationName(request.getOrganizationName().trim());
+            organization.setContactNumber(request.getContactNumber().trim());
+            organization.setRegistrationNumber(request.getRegistrationNumber().trim());
+            organization.setLicenseDocumentUrl(request.getLicenseDocumentUrl().trim());
+            int capacity = request.getDailyCapacityServings();
             organization.setDailyCapacityServings(capacity);
             organization.setRemainingCapacityServings(capacity);
             organization.setCapacityResetDate(LocalDate.now(ZoneId.of("Asia/Yangon")));
@@ -106,6 +115,12 @@ public class AuthService {
             volunteer.setUser(saveUser);
             volunteer.setIsAvailable(request.getIsAvailable() == null || request.getIsAvailable());
             volunteerDao.save(volunteer);
+        }
+    }
+
+    private void requireOrganizationField(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            throw new ResponseStatusException(BAD_REQUEST, fieldName + " is required");
         }
     }
 

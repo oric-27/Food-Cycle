@@ -50,12 +50,13 @@ public class AdminController {
             var organization = organizationDao.findByUserEmail(user.getEmail())
                     .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Organization profile not found"));
             if (isBlank(organization.getOrganizationName()) || isBlank(organization.getAddress())
-                    || isBlank(organization.getContactNumber()) || isBlank(organization.getLicenseDocumentUrl())
+                    || isBlank(organization.getContactNumber()) || isBlank(organization.getRegistrationNumber())
                     || isBlank(organization.getLicenseDocumentUrl())
                     || organization.getDailyCapacityServings() == null
                     || organization.getDailyCapacityServings() <= 0) {
                 throw new ResponseStatusException(
-                        BAD_REQUEST, "Organization profile, registration, license and positive daily capacity are required");
+                        BAD_REQUEST,
+                        "Organization name, address, contact number, registration, license, and positive daily capacity are required");
             }
         }
 

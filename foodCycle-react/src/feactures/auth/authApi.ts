@@ -7,6 +7,9 @@ export interface RegisterPayload {
     roleName: UserRole;
     address?: string;
     providerType?: string;
+    organizationName?: string;
+    contactNumber?: string;
+    licenseDocumentUrl?: string;
     registrationNumber?: string;
     dailyCapacityServings?: number;
     isAvailable?: boolean;
@@ -29,6 +32,9 @@ export async function register(payload: RegisterPayload): Promise<void> {
         roleName: payload.roleName,
         address: payload.address?.trim() || undefined,
         providerType: payload.providerType,
+        organizationName: payload.organizationName?.trim() || undefined,
+        contactNumber: payload.contactNumber?.trim() || undefined,
+        licenseDocumentUrl: payload.licenseDocumentUrl?.trim() || undefined,
         registrationNumber: payload.registrationNumber?.trim() || undefined,
         dailyCapacityServings: payload.dailyCapacityServings,
         isAvailable: payload.isAvailable
@@ -36,6 +42,18 @@ export async function register(payload: RegisterPayload): Promise<void> {
 
     if (!normailzedPayload.username || !normailzedPayload.email || !normailzedPayload.password) {
         throw new Error("Please complete all registration fields");
+    }
+    if (payload.roleName === "ORGANIZATION" && (
+        !normailzedPayload.organizationName
+        || !normailzedPayload.address
+        || !normailzedPayload.contactNumber
+        || !normailzedPayload.licenseDocumentUrl
+        || !normailzedPayload.registrationNumber
+        || !Number.isInteger(normailzedPayload.dailyCapacityServings)
+        || !normailzedPayload.dailyCapacityServings
+        || normailzedPayload.dailyCapacityServings < 1
+    )) {
+        throw new Error("Complete all organization details and enter a positive whole-number daily capacity.");
     }
 
     const response = await fetch(`${API_URL}/register`, {

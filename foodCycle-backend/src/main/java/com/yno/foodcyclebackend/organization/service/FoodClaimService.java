@@ -57,6 +57,7 @@ public class FoodClaimService {
         if (request.getClaimedServings() > listing.getServingsEquivalent()) {
             throw new ResponseStatusException(BAD_REQUEST, "Requested servings exceed available servings");
         }
+        organizationService.reserveCapacity(organization, request.getClaimedServings());
 
         String otp = String.format("%06d", secureRandom.nextInt(1_000_000));
         FoodClaim claim = new FoodClaim();

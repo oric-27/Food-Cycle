@@ -27,9 +27,9 @@ public class OrganizationService {
 
     @Transactional
     public OrganizationProfileResponse getProfile(Authentication authentication) {
-        Organization organization = new Organization();
+        Organization organization = lockByEmail(authentication.getName());
         resetCapacityIfNewDay(organization);
-        return OrganizationProfileResponse.from(organization);
+        return OrganizationProfileResponse.from(organizationDao.save(organization));
     }
 
     @Transactional
@@ -93,11 +93,11 @@ public class OrganizationService {
     }
 
     public void reserveCapacity(Organization organization, int servings) {
-        int remaining = organization.getRemainingCapacityServings();
+        int remaining = remainingCapacity(organization);
         if (servings > remaining) {
             throw new ResponseStatusException(
                     BAD_REQUEST,
-                    "Required serving exceed your remaining daily capacity of " + remaining
+                    "Requested servings exceed your remaining daily capacity of " + remaining
             );
         }
         organization.setRemainingCapacityServings(remaining - servings);
