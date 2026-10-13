@@ -26,7 +26,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final UserDetailsService userDetailsService;
@@ -50,7 +50,7 @@ public class SecurityConfig {
                 s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.authorizeHttpRequests( auth -> {
             auth.requestMatchers("/api/auth/**").permitAll();
-            auth.requestMatchers("/api/provider/**").hasRole("FOOD_PROVIDER");
+            auth.requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN");
             auth.anyRequest().authenticated();
         });
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

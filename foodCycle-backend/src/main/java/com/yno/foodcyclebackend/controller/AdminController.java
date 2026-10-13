@@ -27,7 +27,7 @@ public class AdminController {
 
 
     @PostMapping("/users/{id}/approve")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ResponseEntity<String> approveUser(@PathVariable Long id) {
         var user = userDao.findById(id)
@@ -64,7 +64,7 @@ public class AdminController {
     }
 
     @PostMapping("/users/{id}/reject")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional
     public ResponseEntity<String> rejectUser(@PathVariable Long id) {
         var user = userDao.findById(id)
@@ -74,14 +74,14 @@ public class AdminController {
     }
 
     @PostMapping("/users/{id}/assign-role")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<String> assignRole(@PathVariable Long id, @RequestBody Map<String, String> request) {
         String role = request.get("role");
         return ResponseEntity.ok("Role " + role + " assigned to user " + id);
     }
 
     @GetMapping("/users")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<String> getAllUsers() {
         return ResponseEntity.ok("List of all users");
     }

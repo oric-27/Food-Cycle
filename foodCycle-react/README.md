@@ -1,5 +1,22 @@
 # React + TypeScript + Vite
 
+## Backend authentication
+
+The login and registration screens use the FoodCycle Spring Boot API. By default,
+the frontend sends requests to `http://localhost:8080/api`. Set
+`VITE_API_BASE_URL` in a local `.env` file if the backend is running elsewhere,
+for example:
+
+```dotenv
+VITE_API_BASE_URL=http://localhost:8080/api
+```
+
+Start the backend before using login or registration. Successful login stores
+the JWT in browser storage (session storage by default; local storage when
+“Remember me” is selected). Sign out removes the stored token. The current
+backend uses stateless JWT authentication and does not provide a server-side
+logout or password-reset endpoint.
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:

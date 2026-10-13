@@ -31,7 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
         System.out.println("DEBUG JWT Filter: Auth header: " + (authHeader != null ? authHeader.substring(0, Math.min(20, authHeader.length())) + "..." : "null"));
-        
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             System.out.println("DEBUG JWT Filter: No Bearer token, proceeding without auth");
             filterChain.doFilter(request, response);

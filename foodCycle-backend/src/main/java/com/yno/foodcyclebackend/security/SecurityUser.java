@@ -21,7 +21,7 @@ public class SecurityUser implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return user.getRoles()
                 .stream()
-                .map(role -> new SimpleGrantedAuthority(role.getRoleName().name()))
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName().name()))
                 .toList();
     }
 
@@ -37,6 +37,7 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
+        System.out.println("DEBUG SecurityUser: isEnabled called, isActive=" + user.getIsActive());
         return Boolean.TRUE.equals(user.getIsActive());
     }
 

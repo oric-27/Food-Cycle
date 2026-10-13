@@ -27,9 +27,9 @@ public class OrganizationService {
 
     @Transactional
     public OrganizationProfileResponse getProfile(Authentication authentication) {
-        Organization organization = new Organization();
+        Organization organization = lockByEmail(authentication.getName());
         resetCapacityIfNewDay(organization);
-        return OrganizationProfileResponse.from(organization);
+        return OrganizationProfileResponse.from(organizationDao.save(organization));
     }
 
     @Transactional
